@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Saludo + .l.</title>
+  <style>
+    :root{
+      --bg:#0f1220; --card:#171a2b; --text:#e7e9ee; --muted:#9aa3b2; --accent:#7aa2ff;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+      background: radial-gradient(1200px 600px at 20% -10%, #1b2141 0%, #0f1220 60%);
+      color:var(--text); display:grid; place-items:center; padding:24px;
+    }
+    .card{
+      width:min(680px, 92vw);
+      background:linear-gradient(180deg, #1a1e33 0%, #121529 100%);
+      border:1px solid #232844; border-radius:20px; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.35);
+    }
+    h1{
+      margin:0 0 10px 0; font-size:clamp(20px, 2.2vw + 16px, 32px); font-weight:700; letter-spacing:.2px;
+    }
+    .sub{color:var(--muted); margin-bottom:18px; font-size:14px}
+    .display{
+      display:flex; align-items:center; justify-content:space-between; gap:18px;
+      background:var(--card); border:1px solid #242a4b; border-radius:16px; padding:18px 20px;
+    }
+    .msg{
+      font-size:clamp(26px, 4vw + 8px, 46px); font-weight:800; line-height:1.1;
+      letter-spacing:.5px; word-break:break-word;
+    }
+    .finger{
+      font-size:clamp(56px, 10vw, 120px); filter: drop-shadow(0 6px 20px rgba(0,0,0,.35));
+      user-select:none;
+    }
+    .controls{
+      margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;
+    }
+    input[type="text"]{
+      flex:1; min-width:220px; padding:12px 14px; border-radius:12px; border:1px solid #2a3158;
+      background:#121529; color:var(--text); outline:none; font-size:15px;
+    }
+    button{
+      padding:12px 16px; border-radius:12px; border:1px solid #4056b4; background:linear-gradient(180deg,#6486ff,#5275ff);
+      color:white; font-weight:700; cursor:pointer; transition:transform .06s ease, box-shadow .2s ease;
+      box-shadow:0 8px 24px rgba(122,162,255,.35);
+    }
+    button:hover{transform:translateY(-1px)}
+    button:active{transform:translateY(0)}
+    .muted{font-size:12px; color:var(--muted); margin-top:8px}
+    .row{display:flex; align-items:center; gap:12px}
+    .badge{
+      font:600 12px/1 system-ui; padding:6px 10px; border-radius:999px; background:#1b2244; color:#a9b8ff; border:1px solid #2a3a86;
+    }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="title">
+    <div class="row" style="justify-content:space-between; margin-bottom:10px;">
+      <h1 id="title">Son todos putos.</h1>
+      <span class="badge" title="Todo en un solo archivo">HTML+CSS+JS</span>
+    </div>
+    <p class="sub">Curso para Hector 1, Hector 2 y Kevin</p>
+
+    <section class="display" aria-live="polite">
+      <div class="msg" id="msg">.l.</div>
+      <div class="finger" aria-label="Señal de dedo medio" title=".l.">🖕</div>
+    </section>
+
+    <div class="controls">
+      <input id="input" type="text" placeholder="Escribe tu mensaje (p. ej. Hola equipo)" maxlength="120" />
+      <button id="btn">Actualizar</button>
+    </div>
+    <div class="muted">Tip: Tu cambio se guarda en localStorage. Recarga y se mantiene.</div>
+  </main>
+
+  <script>
+    (function(){
+      const input = document.getElementById('input');
+      const msg = document.getElementById('msg');
+      const btn = document.getElementById('btn');
+      const KEY = 'saludo_msg_v1';
+
+      // Cargar guardado
+      try{
+        const saved = localStorage.getItem(KEY);
+        if(saved && typeof saved === 'string'){ msg.textContent = saved; input.value = saved; }
+      }catch(_){/* ignore storage errors */}
+
+      function setMessage(text){
+        const clean = (text || '').trim();
+        // Evitamos palabras ofensivas comunes automáticamente
+        const banned = [];
+        const isBanned = banned.some(rx => rx.test(clean));
+        msg.textContent = isBanned || !clean ? '.l.' : clean.slice(0,120);
+        try{ localStorage.setItem(KEY, msg.textContent); }catch(_){}
+      }
+
+      btn.addEventListener('click', () => setMessage(input.value));
+      input.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter'){ e.preventDefault(); setMessage(input.value); }
+      });
+    })();
+  </script>
+</body>
+</html>
