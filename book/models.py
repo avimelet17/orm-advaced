@@ -10,3 +10,9 @@ class Libro(m.Model):
         related_name='libro_editorial',
         on_delete=m.PROTECT,
     )
+    
+    
+class LibroCalificacion(m.Model):
+    libro = m.ForeignKey('book.Libro', related_name='libro_calificacion', on_delete=m.PROTECT)
+    estrellas = m.PositiveIntegerField()
+    calificacion = m.CharField(max_length=70, blank=True)
