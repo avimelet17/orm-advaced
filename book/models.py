@@ -12,6 +12,10 @@ class Libro(m.Model):
         on_delete=m.PROTECT,
     )
     fecha_publicacion = m.DateField(null=True, default=timezone.now())
+    imagen = m.URLField(max_length=85, null=True)
+    desc_corta = m.CharField(max_length=2000, default='Sin descripción.')
+    estatus = m.CharField(max_length=1, default="1")
+    categoria = m.CharField(max_length=50, default='Sexo Anal Gore Furro')
      
     
 class LibroCalificacion(m.Model):
