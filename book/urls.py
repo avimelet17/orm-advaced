@@ -30,4 +30,19 @@ urlpatterns = [
         view=views.ConsultaConPrefetchYSelectRelated.as_view(),
         name="home"
     ),
+    path(
+        route="SinPrefetchBien",
+        view=views.SinPrefetchBien.as_view(),
+        name="home"
+    ),
+    path(
+        route="SinPrefetchMal",
+        view=views.SinPrefetchMal.as_view(),
+        name="home"
+    ),
+    path(
+        route="ConPrefetch",
+        view=views.ConPrefetch.as_view(),
+        name="home"
+    ),
 ]

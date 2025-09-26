@@ -128,3 +128,93 @@ class ConsultaConPrefetchYSelectRelated(TemplateView):
         for libro in libro_y_calificacion:
             for cal in libro.libro_calificacion.all():
                 print(f'{cal.estrellas} estrellas Calif {cal.calificacion} Editorial {libro.editorial.nombre}')
+                
+                
+class SinPrefetchBien(TemplateView):
+    # Vista de nuevo home
+
+    template_name = "home.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.editoriales_con_sus_libros_publicados_sin_Prefetch()
+        context['que_estoy_viendo'] = "Consulta Con prefetch_related y select_related"
+        return context
+    
+    @staticmethod
+    # Ejemplos usando Prefetch
+    def editoriales_con_sus_libros_publicados_sin_Prefetch():
+
+        editoriales = me.Editorial.objects.filter(pk__in=(1, 10, 4)).prefetch_related(
+            'libro_editorial'
+        )
+
+        for editorial in editoriales:
+            print(f'******** Editorial {editorial.nombre} ************')
+            print('Libros publicados:')
+            for libro in editorial.libro_editorial.all():
+                print(
+                    f'{libro.isbn} Titulo: {libro.titulo}\n'
+                    f'Publicado el: {libro.fecha_publicacion}'
+                )
+        print('\n')
+
+class SinPrefetchMal(TemplateView):
+    # Vista de nuevo home
+
+    template_name = "home.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.editoriales_con_sus_libros_publicados_sin_Prefetch()
+        context['que_estoy_viendo'] = "Consulta Con prefetch_related y select_related"
+        return context
+    
+    @staticmethod
+    # Ejemplos usando Prefetch
+    def editoriales_con_sus_libros_publicados_sin_Prefetch():
+
+        editoriales = me.Editorial.objects.filter(pk__in=(1, 10, 4)).prefetch_related(
+            'libro_editorial'
+        )
+
+        for editorial in editoriales:
+            print(f'******** Editorial {editorial.nombre} ************')
+            print('Libros publicados:')
+            for libro in editorial.libro_editorial.filter(fecha_publicacion__year__gte = 2025):
+                print(
+                    f'{libro.isbn} Titulo: {libro.titulo}\n'
+                    f'Publicado el: {libro.fecha_publicacion}'
+                )
+        print('\n')
+
+
+
+class ConPrefetch(TemplateView):
+    # Vista de nuevo home
+
+    template_name = "home.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.editoriales_con_sus_libros_publicados_con_Prefetch()
+        context['que_estoy_viendo'] = "Consulta Con prefetch_related y select_related"
+        return context
+    
+    @staticmethod
+    # Ejemplos usando Prefetch
+    def editoriales_con_sus_libros_publicados_con_Prefetch():
+        from django.db.models import Prefetch
+        
+        query_libro = mb.Libro.objects.filter(fecha_publicacion__year__gte=2015)
+        libros_prefetch = Prefetch('libro_editorial', queryset=query_libro, to_attr='libros_validos')
+
+        editoriales = me.Editorial.objects.filter(
+            pk__in=(1, 2, 3)).prefetch_related(libros_prefetch)
+
+        for editorial in editoriales:
+            print(f'******** Editorial {editorial.nombre} ************')
+            print('Libros publicados:')
+            for libro in editorial.libros_validos:
+                print(
+                    f'{libro.isbn} Titulo: {libro.titulo}\n'
+                    f'Publicado el: {libro.fecha_publicacion}'
+                )
+            print('\n')

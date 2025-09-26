@@ -1,4 +1,5 @@
 from django.db import models as m
+from django.utils import timezone
 
 # Create your models here.
 
@@ -10,7 +11,8 @@ class Libro(m.Model):
         related_name='libro_editorial',
         on_delete=m.PROTECT,
     )
-    
+    fecha_publicacion = m.DateField(null=True, default=timezone.now())
+     
     
 class LibroCalificacion(m.Model):
     libro = m.ForeignKey('book.Libro', related_name='libro_calificacion', on_delete=m.PROTECT)
