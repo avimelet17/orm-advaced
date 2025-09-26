@@ -6,8 +6,28 @@ from book import views
 # Viewsalmacenes:renovada
 urlpatterns = [
     path(
-        route="",
-        view=views.HomeView.as_view(),
+        route="ConsultaSinSelectRelated",
+        view=views.ConsultaSinSelectRelated.as_view(),
         name="home"
-    )
+    ),
+    path(
+        route="ConsultaConSelectRelated",
+        view=views.ConsultaConSelectRelated.as_view(),
+        name="home"
+    ),
+    path(
+        route="ConsultaSinPrefetchRelated",
+        view=views.ConsultaSinPrefetchRelated.as_view(),
+        name="home"
+    ),
+    path(
+        route="ConsultaConPrefetchRelated",
+        view=views.ConsultaConPrefetchRelated.as_view(),
+        name="home"
+    ),
+    path(
+        route="ConsultaConPrefetchYSelectRelated",
+        view=views.ConsultaConPrefetchYSelectRelated.as_view(),
+        name="home"
+    ),
 ]
