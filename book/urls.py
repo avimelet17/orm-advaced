@@ -45,4 +45,9 @@ urlpatterns = [
         view=views.ConPrefetch.as_view(),
         name="home"
     ),
+    path(
+        route="TodoEnUno",
+        view=views.TodoEnUno.as_view(),
+        name="home"
+    ),
 ]

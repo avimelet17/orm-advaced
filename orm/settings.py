@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'book',
     'editorial',
+    'autor',
     "django_extensions",
 ]
 

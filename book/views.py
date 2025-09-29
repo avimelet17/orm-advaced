@@ -7,6 +7,7 @@ import random
 
 from book import models as mb
 from editorial import models as me
+from autor import models as ma
 
 # Colores visibles que soporta termcolor
 COLORES = ["red", "green", "yellow", "blue", "magenta", "cyan", "white"]
@@ -218,3 +219,31 @@ class ConPrefetch(TemplateView):
                     f'Publicado el: {libro.fecha_publicacion}'
                 )
             print('\n')
+
+
+class TodoEnUno(TemplateView):
+    # Vista de nuevo home
+
+    template_name = "home.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.editoriales_con_sus_libros_publicados_con_Prefetch()
+        context['que_estoy_viendo'] = "Consulta Con prefetch_related y select_related"
+        return context
+    
+    @staticmethod
+    # Ejemplos usando Prefetch
+    def editoriales_con_sus_libros_publicados_con_Prefetch():
+        from django.db.models import Prefetch
+        
+        query_autores = ma.Autor.objects.all().only('name')
+        autor_prefetch = Prefetch('libros_autores', queryset=query_autores, to_attr='atributo_autor')
+        
+        query_libros = mb.Libro.objects.filter(
+            titulo__endswith='Omega'
+        ).prefetch_related(autor_prefetch)
+        
+        for libro in query_libros:
+            print(f'Libro {libro.titulo}')
+            for autor in libro.atributo_autor:
+                print(f'Autor: {autor.name}')
