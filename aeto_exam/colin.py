@@ -3,8 +3,9 @@ from django.shortcuts import render
 # Create your views here.
 from django.views.generic import TemplateView
 from django.db.models import Prefetch
-from .models import Autor, Libro, LibroCalificacion, Editorial
-
+from autor.models import Autor
+from book.models import Libro, LibroCalificacion
+from editorial.models import Editorial
 
 # --- Caso 1 ---
 class Caso1LibrosConEditorial(TemplateView):
