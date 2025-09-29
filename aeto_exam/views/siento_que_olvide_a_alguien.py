@@ -20,7 +20,10 @@ class Caso1LibrosConEditorial(TemplateView):
 
     @staticmethod
     def libros_con_editorial():
-        libros = Libro.objects.all()
+
+        id_editorial=[1,2]        
+        libros = Libro.objects.filter(
+            editorial__pk__in= id_editorial).select_related('editorial').only('titulo', 'editorial__nombre')
         for libro in libros:
             print(libro.titulo, libro.editorial.nombre)
 
@@ -44,9 +47,14 @@ class Caso2CalificacionesConLibro(TemplateView):
 
     @staticmethod
     def calificaciones_con_libro():
-        califs = LibroCalificacion.objects.all()
-        for c in califs:
-            print(c.estrellas, "->", c.libro.titulo)
+
+        califs_query = LibroCalificacion.objects.all().only('estrellas')
+        califs_prefetch= Prefetch('libro_calificacion', queryset=califs_query, to_attr='calificacion')
+        
+        libros= Libro.objects.all().prefetch_related(califs_prefetch).only('titulo')
+        for libro in libros:
+            for c in libro.calificacion:
+                print(c.estrellas, "->", libro.titulo)
 
         """
         PROBLEMA:
@@ -68,9 +76,17 @@ class Caso3AutoresConLibros(TemplateView):
 
     @staticmethod
     def autores_con_libros():
-        autores = Autor.objects.all()
-        for a in autores:
-            print(a.name, [libro.titulo for libro in a.book.all()])
+
+        
+        autores_query = Autor.objects.all().only('name')
+        autores_prefetch= Prefetch('libros_autores', queryset=autores_query, to_attr='info_autor')
+        
+        libros= Libro.objects.all().prefetch_related(autores_prefetch).only('titulo')
+        
+        for libro in libros:
+            for a in libro.info_autor:
+                print(a.name, libro.titulo)
+            
 
         """
         PROBLEMA:
@@ -116,9 +132,13 @@ class Caso5OnlyEjemplo(TemplateView):
 
     @staticmethod
     def only_ejemplo():
-        libros = Libro.objects.only("titulo")
-        for l in libros:
-            print(l.titulo, l.editorial.nombre)
+         
+        libros_query = Libro.objects.only("titulo")
+        prefect_libro=  Prefetch('libro_editorial', queryset= libros_query, to_attr='info_libro')                                       
+        editoriales = Editorial.objects.filter(nombre__iexact='editorial gamma').prefetch_related(prefect_libro)            
+        for editorial in editoriales:
+                for libro in editorial.info_libro:
+                    print(libro.titulo, editorial.nombre)
 
         """
         PROBLEMA:
@@ -140,7 +160,7 @@ class Caso6DeferEjemplo(TemplateView):
 
     @staticmethod
     def defer_ejemplo():
-        libros = Libro.objects.defer("desc_corta")
+        libros = Libro.objects.only("desc_corta")
         for l in libros:
             print(l.titulo)
 
@@ -164,10 +184,17 @@ class Caso7AutoresLibrosEditorial(TemplateView):
 
     @staticmethod
     def autores_libros_editorial():
-        autores = Autor.objects.all()
-        for a in autores:
-            for l in a.book.all():
-                print(a.name, l.titulo, l.editorial.nombre)
+
+
+        autores_query = Autor.objects.only('name')
+        autor_prefetch= Prefetch('libros_autores', queryset=autores_query, to_attr='info_autor')
+        libro_query= Libro.objects.only('titulo').prefetch_related(autor_prefetch)
+        libro_prefetch= Prefetch('libro_editorial', queryset=libro_query, to_attr='libros')
+        editorial =Editorial.objects.only('nombre').prefetch_related(libro_prefetch)
+        for e in editorial:
+            for l in e.libros:
+                for a in l.libros.info_autor:
+                    print(a.name, l.titulo, e.nombre)
 
         """
         PROBLEMA:
