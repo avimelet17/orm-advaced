@@ -7,7 +7,6 @@ from autor.models import Autor
 from book.models import Libro, LibroCalificacion
 from editorial.models import Editorial
 
-
 # --- Caso 1 ---
 class Caso1LibrosConEditorial(TemplateView):
     template_name = "home.html"
@@ -20,7 +19,7 @@ class Caso1LibrosConEditorial(TemplateView):
 
     @staticmethod
     def libros_con_editorial():
-        libros = Libro.objects.all()
+        libros = Libro.objects.all().select_related('editorial').only('titulo','editorial__nombre')
         for libro in libros:
             print(libro.titulo, libro.editorial.nombre)
 
@@ -28,7 +27,7 @@ class Caso1LibrosConEditorial(TemplateView):
         PROBLEMA:
         - Esto genera un N+1 (una query para libros y otra por cada editorial).
         EJERCICIO:
-        - Optimízalo.
+        - Optimízalo
         """
 
 
@@ -44,7 +43,7 @@ class Caso2CalificacionesConLibro(TemplateView):
 
     @staticmethod
     def calificaciones_con_libro():
-        califs = LibroCalificacion.objects.all()
+        califs = LibroCalificacion.objects.select_related('libro').only('estrellas', 'libro__titulo')
         for c in califs:
             print(c.estrellas, "->", c.libro.titulo)
 
@@ -52,7 +51,7 @@ class Caso2CalificacionesConLibro(TemplateView):
         PROBLEMA:
         - Cada acceso a c.libro dispara otra query (N+1).
         EJERCICIO:
-        - Optimízalo.
+        - Optimízalo
         """
 
 
@@ -68,7 +67,7 @@ class Caso3AutoresConLibros(TemplateView):
 
     @staticmethod
     def autores_con_libros():
-        autores = Autor.objects.all()
+        autores = Autor.objects.all().prefetch_related('book').only('name', 'book__titulo')
         for a in autores:
             print(a.name, [libro.titulo for libro in a.book.all()])
 
@@ -76,7 +75,7 @@ class Caso3AutoresConLibros(TemplateView):
         PROBLEMA:
         - Autor → Libro es ManyToMany. Cada .book.all() dispara queries extra.
         EJERCICIO:
-        - Optimízalo.
+        - Optimízalo
         """
 
 
@@ -92,7 +91,7 @@ class Caso4ValuesEjemplo(TemplateView):
 
     @staticmethod
     def values_ejemplo():
-        datos = Libro.objects.values("isbn", "titulo", "editorial__nombre")
+        datos = Libro.objects.only("isbn", "titulo", "editorial__nombre")
         for d in datos:
             print(d)
 
@@ -100,7 +99,7 @@ class Caso4ValuesEjemplo(TemplateView):
         PROBLEMA:
         - values() devuelve dicts, no instancias de modelos.
         EJERCICIO:
-        - Reescribe usando lo que toca.
+        - Reescribe
         """
 
 
@@ -116,7 +115,7 @@ class Caso5OnlyEjemplo(TemplateView):
 
     @staticmethod
     def only_ejemplo():
-        libros = Libro.objects.only("titulo")
+        libros = Libro.objects.select_related('editorial').only("titulo", 'editorial__nombre')
         for l in libros:
             print(l.titulo, l.editorial.nombre)
 
@@ -124,7 +123,7 @@ class Caso5OnlyEjemplo(TemplateView):
         PROBLEMA:
         - only("titulo") carga solo titulo. Acceder a editorial dispara query extra.
         EJERCICIO:
-        - Ajusta.
+        - Ajusta
         """
 
 
@@ -140,7 +139,7 @@ class Caso6DeferEjemplo(TemplateView):
 
     @staticmethod
     def defer_ejemplo():
-        libros = Libro.objects.defer("desc_corta")
+        libros = Libro.objects.only("titulo")
         for l in libros:
             print(l.titulo)
 
@@ -164,14 +163,18 @@ class Caso7AutoresLibrosEditorial(TemplateView):
 
     @staticmethod
     def autores_libros_editorial():
-        autores = Autor.objects.all()
+        query = Libro.objects.select_related('editorial').only('titulo', 'editorial__nombre')
+        info_prefetch = Prefetch('book', queryset=query, to_attr='info')
+        
+        autores = Autor.objects.all().prefetch_related(info_prefetch).only('name')
+        
         for a in autores:
-            for l in a.book.all():
+            for l in a.info:
                 print(a.name, l.titulo, l.editorial.nombre)
 
         """
         PROBLEMA:
         - N+1 por autores, N+1 por libros y otro N+1 por editoriales.
         EJERCICIO:
-        - Optimízalo.
+        - Optimízalo
         """
